@@ -1,113 +1,131 @@
-import Image from 'next/image'
+'use client';
+
+export const revalidate = 30;
+
+import React, { useState, useEffect, use } from 'react';
+import { client } from '@/sanity/lib/client';
+import { CategoryPreview, Hero, Product, GallerySlider } from '@/components/Index';
+
+import { FaWallet, FaVirusSlash, FaBriefcase } from "react-icons/fa";
+import { GiAutoRepair } from "react-icons/gi";
+import { IoIosSpeedometer } from "react-icons/io";
 
 export default function Home() {
+  const [products, setProducts] = useState(null);
+  const [categories, setCategories] = useState(null);
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const query = '*[_type == "product"]'
+    client.fetch(query)
+      .then((data) => {
+        setProducts(data)
+      })
+  }, [])
+
+  useEffect(() => {
+    const query = '*[_type == "category"]'
+    client.fetch(query)
+      .then((data) => {
+        setCategories(data)
+        setLoading(false)
+      })
+  }, [])
+
+
+  if (isLoading) return <p>Loading...</p>
+  if (!products || !categories) return <p>Error Loading Data</p>
+
+  const featured = products.filter((item) => item.featured == true);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className='overflow-hidden'>
+      <div>
+        <div className="relative text-center text-white">
+          <GallerySlider />
+          <div className="absolute left-2.5 sm:left-1/4 bottom-1/4">
+            <span className="bg-red-600 inline-block w-44 rounded-full p-5"><span className="text-base">UP TO</span><br></br><span className="text-3xl font-bold">40% OFF</span> <span className="text-xs font-light">ON SELECT PRODUCTS</span></span>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      {/* POPULAR PRODUCTS SECTION */}
+      <div className="mt-1 pt-0.5 md:mt-20">
+        <p className="font-serif text-6xl tracking-wide text-center my-10 mx-0 text-[#324d67]">Popular Products</p>
+      </div>
+      <div className='w-fit mx-auto grid grid-cols-1 2xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-5 pb-24'>
+        {featured?.map((product) => <Product key={product._id} product={product}/>)}
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <Hero />
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:pb-16">
+          <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-8">
+            <h2 className="text-2xl font-bold text-gray-900">Categories</h2>
+            <div className="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
+            {categories?.map((category) => <CategoryPreview key={category._id} category={category}/>)}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Incentive Section for Diagnostic and Repair */}
+      <section className="pb-10 relative">
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8">
+        <div className="grid grid-cols-10 gap-8">
+          <div className="col-span-10 lg:col-span-4 bg-cover bg-center h-[273px] rounded-xl flex flex-col justify-end p-6 lg:items-start items-center" style={{backgroundImage: "url('/diagnostic.jpg')"}}>
+            <h4 className="font-medium text-xl leading-8 text-white mb-4">Set Appointment Today</h4>
+            <form className="form flex flex-col md:flex-row gap-4">
+              <div className="flex items-center rounded-[100px] border border-gray-300 bg-transparent py-[10px] px-4 gap-2">
+              {/* <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  
+                </svg> */}
+                <input type="text" name="text" id="" placeholder="Phone Number" className="w-4/5	outline-none border-none font-normal text-base py-[1px] text-gray-400 bg-transparent" />
+              </div>
+              <button className="bg-indigo-600 rounded-[100px] py-[13px] px-6 font-semibold text-sm text-white whitespace-nowrap focus-within:outline-0 shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">Set Appointment</button>
+            </form>
+          </div>
+          <div className="col-span-10 lg:col-span-6 w-full" id="services">
+            <div className="box flex h-full justify-center flex-col">
+              <h2 className="font-manrope font-bold text-3xl leading-10 text-black mb-14 lg:text-left text-center">Computer Diagnostics and Repair</h2>
+              <div className="grid grid-cols-3 sm:grid-cols-5 w-full">
+                <div className="box flex flex-col items-center">
+                  <button className="rounded-full p-3 flex items-center justify-center mx-auto bg-white shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-50 hover:shadow-indigo-200 text-blue-700">
+                    <FaWallet size={36}/>
+                  </button>
+                  <p className="mt-2 w-[92px] text-center font-medium text-sm text-black"> 7* day Payment </p>
+                </div>
+                <div className="box flex flex-col items-center">
+                  <button className="rounded-full p-3 flex items-center justify-center mx-auto bg-white shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-50 hover:shadow-indigo-200 text-blue-700">
+                    <FaVirusSlash size={36}/>
+                  </button>
+                  <p className="mt-2 w-[92px] text-center font-medium text-sm text-black"> Virus Scan </p>
+                </div>
+                <div className="box flex flex-col items-center">
+                  <button className="rounded-full p-3 flex items-center justify-center mx-auto bg-white shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-50 hover:shadow-indigo-200 text-blue-700">
+                    <GiAutoRepair size={36}/>
+                  </button>
+                  <p className="mt-2 w-[92px] text-center font-medium text-sm text-black"> Repair </p>
+                </div>
+                <div className="box flex flex-col items-center">
+                  <button className="rounded-full p-3 flex items-center justify-center mx-auto bg-white shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-50 hover:shadow-indigo-200 text-blue-700">
+                    <FaBriefcase size={36} />
+                  </button>
+                  <p className="mt-2 w-[92px] text-center font-medium text-sm text-black"> Consultation </p>
+                </div>
+                <div className="box flex flex-col items-center">
+                  <button className="rounded-full p-3 flex items-center justify-center mx-auto bg-white shadow-sm shadow-transparent transition-all duration-500 hover:bg-indigo-50 hover:shadow-indigo-200 text-blue-700">
+                    <IoIosSpeedometer size={36} />
+                  </button>
+                  <p className="mt-2 w-[92px] text-center font-medium text-sm text-black"> Overclock </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
     </main>
   )
 }
